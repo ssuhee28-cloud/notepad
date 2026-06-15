@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tiptap editor styles */
+.ProseMirror {
+  outline: none;
+  min-height: 100%;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #9ca3af;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.ProseMirror h1 { @apply text-3xl font-bold mt-6 mb-3; }
+.ProseMirror h2 { @apply text-2xl font-bold mt-5 mb-2; }
+.ProseMirror h3 { @apply text-xl font-semibold mt-4 mb-2; }
+.ProseMirror p  { @apply mb-2 leading-relaxed; }
+.ProseMirror ul { @apply list-disc pl-5 mb-2; }
+.ProseMirror ol { @apply list-decimal pl-5 mb-2; }
+.ProseMirror li { @apply mb-1; }
+.ProseMirror blockquote {
+  @apply border-l-4 border-green-400 pl-4 italic text-gray-600 my-3;
+}
+.ProseMirror code {
+  @apply bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-pink-600;
+}
+.ProseMirror pre {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-lg my-3 overflow-x-auto;
+}
+.ProseMirror pre code {
+  @apply bg-transparent text-gray-100 p-0;
+}
+.ProseMirror mark {
+  @apply bg-yellow-200 px-0.5 rounded;
+}
+.ProseMirror hr {
+  @apply border-gray-200 my-4;
+}
+.ProseMirror ul[data-type="taskList"] {
+  @apply list-none pl-0;
+}
+.ProseMirror ul[data-type="taskList"] li {
+  @apply flex items-start gap-2;
+}
+.ProseMirror ul[data-type="taskList"] li > label {
+  @apply flex items-center mt-1;
+}
+.ProseMirror ul[data-type="taskList"] li > label input[type="checkbox"] {
+  @apply w-4 h-4 accent-green-500 cursor-pointer;
+}
+.ProseMirror ul[data-type="taskList"] li > div {
+  @apply flex-1;
+}
+.ProseMirror ul[data-type="taskList"] li[data-checked="true"] > div {
+  @apply line-through text-gray-400;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
