@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/db'
+import { notes, notesToTags } from '@/lib/schema'
+import { eq, like, or, and, inArray, desc } from 'drizzle-orm'
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -7,30 +9,56 @@ export async function GET(req: Request) {
   const tagId = searchParams.get('tagId')
   const search = searchParams.get('search')
 
-  const notes = await prisma.note.findMany({
-    where: {
-      ...(notebookId ? { notebookId } : {}),
-      ...(tagId ? { tags: { some: { id: tagId } } } : {}),
-      ...(search
-        ? {
-            OR: [
-              { title: { contains: search, mode: 'insensitive' } },
-              { content: { contains: search, mode: 'insensitive' } },
-            ],
-          }
-        : {}),
+  let noteIds: string[] | null = null
+  if (tagId) {
+    const rows = await db
+      .select({ noteId: notesToTags.noteId })
+      .from(notesToTags)
+      .where(eq(notesToTags.tagId, tagId))
+    noteIds = rows.map((r) => r.noteId)
+    if (noteIds.length === 0) return NextResponse.json([])
+  }
+
+  const result = await db.query.notes.findMany({
+    with: {
+      notesToTags: { with: { tag: true } },
+      notebook: { columns: { name: true, color: true } },
     },
-    orderBy: [{ isPinned: 'desc' }, { updatedAt: 'desc' }],
-    include: { tags: true, notebook: { select: { name: true, color: true } } },
+    where: and(
+      notebookId ? eq(notes.notebookId, notebookId) : undefined,
+      noteIds ? inArray(notes.id, noteIds) : undefined,
+      search ? or(like(notes.title, `%${search}%`), like(notes.content, `%${search}%`)) : undefined
+    ),
+    orderBy: [desc(notes.isPinned), desc(notes.updatedAt)],
   })
-  return NextResponse.json(notes)
+
+  return NextResponse.json(
+    result.map((n) => ({ ...n, tags: n.notesToTags.map((nt) => nt.tag) }))
+  )
 }
 
 export async function POST(req: Request) {
   const { notebookId } = await req.json()
-  const note = await prisma.note.create({
-    data: { notebookId: notebookId ?? null },
-    include: { tags: true, notebook: { select: { name: true, color: true } } },
+  const now = new Date().toISOString()
+  const id = crypto.randomUUID()
+
+  await db.insert(notes).values({
+    id,
+    notebookId: notebookId ?? null,
+    createdAt: now,
+    updatedAt: now,
   })
-  return NextResponse.json(note, { status: 201 })
+
+  const note = await db.query.notes.findFirst({
+    where: eq(notes.id, id),
+    with: {
+      notesToTags: { with: { tag: true } },
+      notebook: { columns: { name: true, color: true } },
+    },
+  })
+
+  return NextResponse.json(
+    { ...note, tags: note?.notesToTags.map((nt) => nt.tag) ?? [] },
+    { status: 201 }
+  )
 }

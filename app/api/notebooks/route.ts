@@ -1,17 +1,33 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/db'
+import { notebooks, notes } from '@/lib/schema'
+import { count, eq } from 'drizzle-orm'
 
 export async function GET() {
-  const notebooks = await prisma.notebook.findMany({
-    orderBy: { createdAt: 'asc' },
-    include: { _count: { select: { notes: true } } },
-  })
-  return NextResponse.json(notebooks)
+  const all = await db.select().from(notebooks).orderBy(notebooks.createdAt)
+
+  const counts = await db
+    .select({ notebookId: notes.notebookId, count: count() })
+    .from(notes)
+    .groupBy(notes.notebookId)
+
+  const countMap = Object.fromEntries(counts.map((c) => [c.notebookId, c.count]))
+
+  return NextResponse.json(
+    all.map((nb) => ({ ...nb, _count: { notes: countMap[nb.id] ?? 0 } }))
+  )
 }
 
 export async function POST(req: Request) {
   const { name, color } = await req.json()
   if (!name?.trim()) return NextResponse.json({ error: '이름을 입력하세요' }, { status: 400 })
-  const notebook = await prisma.notebook.create({ data: { name: name.trim(), color: color ?? '#10b981' } })
-  return NextResponse.json(notebook, { status: 201 })
+
+  const now = new Date().toISOString()
+  const id = crypto.randomUUID()
+  const [nb] = await db
+    .insert(notebooks)
+    .values({ id, name: name.trim(), color: color ?? '#10b981', createdAt: now, updatedAt: now })
+    .returning()
+
+  return NextResponse.json({ ...nb, _count: { notes: 0 } }, { status: 201 })
 }
