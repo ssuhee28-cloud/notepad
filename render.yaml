@@ -4,8 +4,8 @@ services:
     plan: free
     env: node
     region: singapore
-    buildCommand: npm install && npm run migrate && npm run build
-    startCommand: npm start
+    buildCommand: npm install && npm run build
+    startCommand: npm run migrate && npm start
     envVars:
       - key: TURSO_DATABASE_URL
         sync: false
