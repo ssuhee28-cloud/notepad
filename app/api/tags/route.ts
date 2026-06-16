@@ -1,7 +1,9 @@
+export const dynamic = 'force-dynamic'
+
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { tags, notesToTags } from '@/lib/schema'
-import { count, eq } from 'drizzle-orm'
+import { count } from 'drizzle-orm'
 
 export async function GET() {
   const all = await db.select().from(tags).orderBy(tags.name)
