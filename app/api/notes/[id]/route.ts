@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/db'
-import { notes, tags, notesToTags } from '@/lib/schema'
+import { db } from '../../../../lib/db'
+import { notes, tags, notesToTags } from '../../../../lib/schema'
 import { eq } from 'drizzle-orm'
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
