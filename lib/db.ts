@@ -1,17 +1,9 @@
-import { createClient } from '@libsql/client'
-import { drizzle } from 'drizzle-orm/libsql'
+import { drizzle } from 'drizzle-orm/postgres-js'
+import postgres from 'postgres'
 import * as schema from './schema'
 
-const globalForDb = globalThis as unknown as { db: ReturnType<typeof drizzle> }
+const connectionString = process.env.DATABASE_URL!
 
-function createDb() {
-  const client = createClient({
-    url: process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-  })
-  return drizzle(client, { schema })
-}
+const client = postgres(connectionString)
 
-export const db = globalForDb.db ?? createDb()
-
-if (process.env.NODE_ENV !== 'production') globalForDb.db = db
+export const db = drizzle(client, { schema })
