@@ -1,8 +1,8 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import Sidebar from '@/components/Sidebar'
-import NoteList from '@/components/NoteList'
-import NoteEditor from '@/components/NoteEditor'
+import Sidebar from '../components/Sidebar'
+import NoteList from '../components/NoteList'
+import NoteEditor from '../components/NoteEditor'
 
 type Note = {
   id: string; title: string; content: string; isPinned: boolean
