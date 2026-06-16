@@ -1,8 +1,8 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/db'
-import { tags, notesToTags } from '@/lib/schema'
+import { db } from '../../../lib/db'
+import { tags, notesToTags } from '../../../lib/schema'
 import { count } from 'drizzle-orm'
 
 export async function GET() {

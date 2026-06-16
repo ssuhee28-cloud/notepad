@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/db'
-import { notes, notesToTags } from '@/lib/schema'
+import { db } from '../../../lib/db'
+import { notes, notebooks, tags, notesToTags } from '../../../lib/schema
 import { eq, like, or, and, inArray, desc } from 'drizzle-orm'
 
 export async function GET(req: Request) {
